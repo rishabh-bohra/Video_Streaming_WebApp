@@ -1,0 +1,33 @@
+- hosts: localhost
+  vars_prompt:
+  - name: n
+    prompt: "enter the name of docker container"
+  - name: p
+    prompt: "enter the xpra client port number"
+  tasks:
+  - service:
+       name: docker
+       state: started
+       enabled: yes
+
+ 
+  - pip:
+       name: docker-py
+       state: present
+
+  - docker_container:
+       name: "{{ n }}"
+       image: 'xpra_vlc:v6'
+       devices: "/dev/snd:/dev/snd"
+       ipc_mode: "host"
+       privileged: True
+       published_ports: "{{ p }}:3333"
+       tty: true
+       volumes:
+          - '/tmp/.X11:/tmp/.X11'
+          - '/var/ftp/pub:/movie_of_your_choice'
+       interactive: True
+       detach: False
+       command: "sed -i 's/geteuid/getppid/'  /usr/bin/vlc -DFOREGROUND"
+ #      command: "/bin/bash" 
+      
